@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum NodeType {
+  FILE
+  FOLDER
+}
+
+model User {
+  id       String @id @default(uuid())
+  username String @unique
+  email    String @unique
+  password String
+
+  // User (rootId) --(UserRoot)--> Node
+  rootId String? @unique
+  root Node? @relation("UserRoot", fields: [rootId], references: [id])
+
+  // Nodes <--(NodeUser)-- User
+  nodes Node[] @relation("NodeUser")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Node {
+  id       String   @id @default(uuid())
+  name     String
+  type     NodeType
+
+  // User <--(rootOf)-- Node
+  rootOf User? @relation("UserRoot")
+
+  // Nodes (userId) --(NodeUser)--> User
+  userId String
+  nodeOf User @relation("NodeUser", fields: [userId], references: [id])
+
+  // Nodes (parentId) --(parent)--> Node
+  // Node <--(chilren)-- Nodes
+  parentId String?
+  parentOf Node?  @relation("ParentChild", fields: [parentId], references: [id])
+  children Node[] @relation("ParentChild")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, parentId])
+}
