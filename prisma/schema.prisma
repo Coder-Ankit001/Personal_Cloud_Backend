@@ -17,6 +17,19 @@ enum NodeType {
   FOLDER
 }
 
+enum Color {
+  blue
+  emerald
+  rose
+  gray
+  violet
+  amber
+  sky
+  pink
+  teal
+  orange
+}
+
 model User {
   id       String @id @default(uuid())
   username String @unique
@@ -25,7 +38,7 @@ model User {
 
   // User (rootId) --(UserRoot)--> Node
   rootId String? @unique
-  root Node? @relation("UserRoot", fields: [rootId], references: [id])
+  root   Node?   @relation("UserRoot", fields: [rootId], references: [id])
 
   // Nodes <--(NodeUser)-- User
   nodes Node[] @relation("NodeUser")
@@ -35,22 +48,23 @@ model User {
 }
 
 model Node {
-  id       String   @id @default(uuid())
-  name     String
-  type     NodeType
+  id    String   @id @default(uuid())
+  name  String
+  type  NodeType
+  color String
 
   // User <--(rootOf)-- Node
   rootOf User? @relation("UserRoot")
 
   // Nodes (userId) --(NodeUser)--> User
   userId String
-  nodeOf User @relation("NodeUser", fields: [userId], references: [id])
+  nodeOf User   @relation("NodeUser", fields: [userId], references: [id])
 
   // Nodes (parentId) --(parent)--> Node
   // Node <--(chilren)-- Nodes
   parentId String?
-  parentOf Node?  @relation("ParentChild", fields: [parentId], references: [id])
-  children Node[] @relation("ParentChild")
+  parentOf Node?   @relation("ParentChild", fields: [parentId], references: [id])
+  children Node[]  @relation("ParentChild")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
