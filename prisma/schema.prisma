@@ -18,16 +18,31 @@ enum NodeType {
 }
 
 enum Color {
-  blue
-  emerald
-  rose
-  gray
-  violet
-  amber
-  sky
-  pink
-  teal
-  orange
+  BLUE
+  EMERALD
+  ROSE
+  GRAY
+  VIOLET
+  AMBER
+  SKY
+  PINK
+  TEAL
+  ORANGE
+}
+
+enum Extension {
+  JPG
+  JPEG
+  PNG
+  GIF
+  MP4
+  MP3
+  PDF
+  DOCS
+  XLSX
+  TXT
+  ZIP
+  CSV
 }
 
 model User {
@@ -51,7 +66,8 @@ model Node {
   id    String   @id @default(uuid())
   name  String
   type  NodeType
-  color String
+  color Color @default(BLUE)
+  ext Extension?
 
   // User <--(rootOf)-- Node
   rootOf User? @relation("UserRoot")
