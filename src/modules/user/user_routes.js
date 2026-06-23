@@ -21,11 +21,11 @@ router.post('/token', (req, res)=>{
   jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN, (err, user)=>{
     if(err) return res.status(403).json({ message: ('Forbidden') })
 
-    const accessToken = jwt.sign({
-      username: user.username
+    const accessToken = jwt.sign({ 
+      id: user.id, username: user.username, email: user.email
     }, process.env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
 
-    return res.status(200).json({ message: ('Token is refreshed!'), accessToken})
+    return res.status(200).json({ message: ('Token is refreshed!'), accessToken, user: {id: user.id, username: user.username, email: user.email}})
   })
 })
 
@@ -40,12 +40,12 @@ router.post('/register', async (req, res)=>{
     const hashPassword = await bcrypt.hash(password, saltRounds)
     const user = await prisma.user.create({ data: {email, username, password: hashPassword}})
 
-    const accessToken = jwt.sign({
-      username: username
+    const accessToken = jwt.sign({ 
+      id: user.id, username: username, email: user.email
     }, process.env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
   
-    const refreshToken = jwt.sign({
-      username: username
+    const refreshToken = jwt.sign({ 
+      id: user.id, username: username, email: user.email
     }, process.env.JWT_REFRESH_TOKEN, { expiresIn: '1d'})
 
     res.cookie('jwt', refreshToken, {
@@ -55,7 +55,7 @@ router.post('/register', async (req, res)=>{
       maxAge: 24 * 60 * 60 * 1000
     })
 
-    return res.status(201).json({ message: ('User created successfully!'), accessToken})
+    return res.status(201).json({ message: ('User created successfully!'), accessToken, user: { id: user.id, username: user.username, email: user.email }})
   }
   catch(e){
     return res.status(500).json({ message: ('Internal Server Error')})
@@ -76,12 +76,12 @@ router.post('/login', async (req, res)=>{
     if(!match) return res.status(401).json({ message: ('Invalid Credentials!') })
   
   
-    const accessToken = jwt.sign({
-      username: username
+    const accessToken = jwt.sign({ 
+      id: user.id, username: username, email: user.email
     }, process.env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
   
-    const refreshToken = jwt.sign({
-      username: username
+    const refreshToken = jwt.sign({ 
+      id: user.id, username: username, email: user.email
     }, process.env.JWT_REFRESH_TOKEN, { expiresIn: '1d'})
 
     res.cookie('jwt', refreshToken, {
@@ -91,7 +91,7 @@ router.post('/login', async (req, res)=>{
       maxAge: 24 * 60 * 60 * 1000
     })
   
-    return res.status(200).json({ message: ('User sucessfully logged in'), accessToken })
+    return res.status(200).json({ message: ('User sucessfully logged in'), accessToken, user: { id: user.id, username: user.username, email: user.email }})
   }
   catch(e){
     return res.status(500).json({ message: ('Internal Server Error')})
