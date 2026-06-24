@@ -10,6 +10,7 @@ router.get('/', (req, res) => {
   res.send('Nodes route is working!');
 });
 
+
 // Create a folder
 router.post('/folder/create', async (req, res)=>{
   const {userId, name, parentId} = req.body
@@ -24,9 +25,10 @@ router.post('/folder/create', async (req, res)=>{
     return res.status(201).json({ message: ('Folder has been created successfully!')})
   }
   catch(e){
-    return res.status(400).json({ message: e || ('Data is invalid')})
+    return res.status(400).json({ message: e.message || ('Data is invalid')})
   }
 })
+
 
 // Delete a folder
 router.delete('/folder/delete', async(req, res)=>{
@@ -35,7 +37,7 @@ router.delete('/folder/delete', async(req, res)=>{
   if(!id || !userId || !type) return res.status(400).json({ message: ('Incomplete Details!') })
 
   try{
-      const node = await prisma.$executeRaw`
+      const count = await prisma.$executeRaw`
       WITH RECURSIVE descendants AS(
         SELECT id FROM "Node"
         WHERE id = ${id}
@@ -52,11 +54,32 @@ router.delete('/folder/delete', async(req, res)=>{
         SELECT id FROM descendants
       )
       `
+      if (count === 0) {
+        return res.status(404).json({
+          message: "Folder not found"
+        });
+      }
       return res.status(200).json({ message: (`Folder with id: ${id} has been deleted!`)})
     }
     catch(e){
       res.status(500).json({ message: e.message || ('Something went wrong!')})
     }
+})
+
+
+// Rename A Folder
+router.post('/folder/rename', async(req, res)=>{
+  const {id, name, userId} = req.body
+  const type = req.body.type?.toUpperCase()
+
+  if(!id || type !== 'FOLDER' || !name || !userId) return res.status(400).json({message: ('Incomplete details!')})
+  try{
+    const node = await prisma.node.update({ where: {id: id, userId: userId}, data: {name: name}})
+    return res.status(200).json({ message: (`Node with id: ${id} name has been changed to -> ${name}`)})
+  }
+  catch(e){
+    return res.status(400).json({ message: e.message || ('Something went wrong!')})
+  }
 })
 
 
@@ -75,9 +98,10 @@ router.post('/file/create', async(req, res)=>{
     return res.status(201).json({ message: ('File has been created successfully!')})
   }
   catch(e){
-    return res.status(400).json({ message: e || ('Data is invalid')})
+    return res.status(400).json({ message: e.message || ('Data is invalid')})
   }
 })
+
 
 // Delete a file
 router.delete('/file', async(req, res)=>{
@@ -90,7 +114,7 @@ router.delete('/file', async(req, res)=>{
     return res.status(204).json({ message: (`File with id: ${id} has been successfully deleted`)})
   }
   catch(e){
-    res.status(400).json({ message: e || ('Something went wrong')})
+    res.status(400).json({ message: e.message || ('Something went wrong')})
   }
 })
 
@@ -110,7 +134,7 @@ router.get('/:id', async(req, res)=>{
       curId = node.parentId
     }
     catch(e){
-      return res.status(400).json({ message: e || ('Error while tracing path')})
+      return res.status(400).json({ message: e.message || ('Error while tracing path')})
     }
     if(!curId) break
   }
@@ -122,6 +146,85 @@ router.get('/:id', async(req, res)=>{
   path.reverse()
 
   return res.status(200).json({ path, message: ('Path generated')})
+})
+
+
+// Get content of a folder
+router.get('/:id/contents', async(req, res)=>{
+  const {id} = req.params
+
+  if(!id) return res.status(400).json({ message: ('Invalid Node id!')})
+
+  const content = await prisma.node.findMany({ where: {parentId: id}})
+  return res.status(200).json({content: content, message: (`Successfully fetched all the child node of root id: ${id}`)})
+})
+
+// Get Images
+router.get('/:userId/file/images', async(req, res)=>{
+  const {userId} = req.params
+
+  if(!userId) return res.status(400).json({ message: ('Nothing to see here!')})
+
+    try{
+      const images = await prisma.node.findMany({ 
+        where: {
+          userId: userId, 
+          ext: {
+            in:   ["JPG", "JPEG", "PNG", "GIF"] 
+          }
+        }
+      })
+      return res.status(200).json({ images: images, message: (`Found all Images with userId: ${userId}`)})
+    }
+    catch(e){
+      return res.status(400).json({ message: e.message || ('Something went wrong!')})
+    }
+})
+
+
+// Get Documents
+router.get('/:userId/file/docs', async(req, res)=>{
+  const {userId} = req.params
+
+  if(!userId) return res.status(400).json({ message: ('Nothing to see here!')})
+
+    try{
+      const docs = await prisma.node.findMany({ 
+        where: {
+          userId: userId, 
+          ext: {
+            in:   ["PDF", "DOCS", "XLSX"] 
+          }
+        },
+      })
+      return res.status(200).json({ docs: docs, message: (`Found all Documents with userId: ${userId}`)})
+    }
+    catch(e){
+      return res.status(400).json({ message: e.message || ('Something went wrong!')})
+    }
+})
+
+
+// Get Mics
+router.get('/:userId/file/mics', async(req, res)=>{
+  const {userId} = req.params
+
+  if(!userId) return res.status(400).json({ message: ('Nothing to see here!')})
+
+    try{
+      const mics = await prisma.node.findMany({ 
+        where: {
+          userId: userId, 
+          ext: {
+            in:   ["TXT", "CSV", "ZIP"] 
+          }
+        },
+      })
+      return res.status(200).json({ mics: mics, message: (`Found all Misc files with userId: ${userId}`)})
+    }
+    catch(e){
+      return res.status(400).json({ message: e.message || ('Something went wrong!')})
+    }
 })
 
 
