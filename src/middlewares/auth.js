@@ -8,6 +8,7 @@ export const authenticate = (req, res, next)=>{
     try{
         const decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN)
         req.userId = decoded.id
+        req.rootId = decoded.rootId
         next()
     }
     catch(e){

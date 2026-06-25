@@ -1,5 +1,21 @@
 import { prisma } from '../../db.js'
 
+// Controller: Rename Node 
+export const renameNode = async(req, res)=>{
+  const {id, name, userId} = req.body
+
+  if(!id || !userId || !name) return res.status(400).json({message: ('Incomplete details!')})
+  try{
+    const node = await prisma.node.update({ where: {id: id, userId: userId}, data: {name: name}})
+    return res.status(200).json({ message: (`Node with id: ${id} name has been changed to -> ${name}`)})
+  }
+  catch(e){
+    return res.status(400).json({ message: e.message || ('Something went wrong!')})
+  }
+}
+
+
+
 // Controller: Create Directory 
 export const createFolder = async (req, res)=>{
   const {userId, name, parentId} = req.body
@@ -52,21 +68,6 @@ export const deleteFolder = async(req, res)=>{
     catch(e){
       res.status(500).json({ message: e.message || ('Something went wrong!')})
     }
-}
-
-// Controller: Rename Directory 
-export const renameFolder = async(req, res)=>{
-  const {id, name, userId} = req.body
-  const type = req.body.type?.toUpperCase()
-
-  if(!id || type !== 'FOLDER' || !name || !userId) return res.status(400).json({message: ('Incomplete details!')})
-  try{
-    const node = await prisma.node.update({ where: {id: id, userId: userId}, data: {name: name}})
-    return res.status(200).json({ message: (`Node with id: ${id} name has been changed to -> ${name}`)})
-  }
-  catch(e){
-    return res.status(400).json({ message: e.message || ('Something went wrong!')})
-  }
 }
 
 
@@ -141,14 +142,15 @@ export const getPath = async(req, res)=>{
 
 // Controller: Get Directory Contents
 export const getContent = async(req, res)=>{
-  const {id} = req.params
+  const { id } = req.params
   const userId = req.userId
 
+  console.log("start")
   if(!id) return res.status(400).json({ message: ('Invalid Node id!')})
   const content = await prisma.node.findMany(
   {
     where: {
-      parentId: id === 'default' ? null : id, 
+      parentId: id,
       userId: userId
     },
     orderBy: [
@@ -160,7 +162,14 @@ export const getContent = async(req, res)=>{
       }
     ]
   })
-  return res.status(200).json({content: content, message: (`Successfully fetched all the child node of root id: ${id}`)})
+
+  const safeContent = content.map(node => ({
+    ...node,
+    size: node.size ? Number(node.size) : 0
+  }))
+
+  console.log("end")
+  return res.status(200).json({content: safeContent, message: (`Successfully fetched all the child node of root id: ${id}`)})
 }
 
 

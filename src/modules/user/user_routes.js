@@ -6,8 +6,6 @@ import { registerUser, loginUser, logoutUser } from './user_controllers.js';
 
 const router = express.Router();
 
-const saltRounds = 10
-
 router.get('/me', (req, res) => {
   res.send('User route is working!');
 });
