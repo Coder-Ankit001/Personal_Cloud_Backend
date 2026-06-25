@@ -1,19 +1,19 @@
 import { prisma } from '../../db.js'
 
+
 // Controller: Rename Node 
 export const renameNode = async(req, res)=>{
-  const {id, name, userId} = req.body
+  const { id, type, name, userId, color } = req.body
 
   if(!id || !userId || !name) return res.status(400).json({message: ('Incomplete details!')})
   try{
-    const node = await prisma.node.update({ where: {id: id, userId: userId}, data: {name: name}})
+    const node = await prisma.node.update({ where: {id: id, userId: userId}, data: {name: name, color: color}})
     return res.status(200).json({ message: (`Node with id: ${id} name has been changed to -> ${name}`)})
   }
   catch(e){
-    return res.status(400).json({ message: e.message || ('Something went wrong!')})
+    return res.status(400).json({ message: ('Node with same name exists!')})
   }
 }
-
 
 
 // Controller: Create Directory 
@@ -30,7 +30,7 @@ export const createFolder = async (req, res)=>{
     return res.status(201).json({ message: ('Folder has been created successfully!')})
   }
   catch(e){
-    return res.status(400).json({ message: e.message || ('Data is invalid')})
+    return res.status(400).json({ message: ('Data is invalid')})
   }
 }
 
@@ -66,7 +66,7 @@ export const deleteFolder = async(req, res)=>{
       return res.status(200).json({ message: (`Folder with id: ${id} has been deleted!`)})
     }
     catch(e){
-      res.status(500).json({ message: e.message || ('Something went wrong!')})
+      res.status(500).json({ message: ('Something went wrong!')})
     }
 }
 
@@ -87,7 +87,7 @@ export const createFile = async(req, res)=>{
     return res.status(201).json({ message: ('File has been created successfully!')})
   }
   catch(e){
-    return res.status(400).json({ message: e.message || ('Data is invalid')})
+    return res.status(400).json({ message: ('Data is invalid')})
   }
 }
 
@@ -102,10 +102,9 @@ export const deleteFile = async(req, res)=>{
     return res.status(204).json({ message: (`File with id: ${id} has been successfully deleted`)})
   }
   catch(e){
-    res.status(400).json({ message: e.message || ('Something went wrong')})
+    res.status(400).json({ message: ('Something went wrong')})
   }
 }
-
 
 
 
@@ -125,7 +124,7 @@ export const getPath = async(req, res)=>{
       curId = node.parentId
     }
     catch(e){
-      return res.status(400).json({ message: e.message || ('Error while tracing path')})
+      return res.status(400).json({ message: ('Error while tracing path')})
     }
     if(!curId) break
   }
@@ -145,7 +144,6 @@ export const getContent = async(req, res)=>{
   const { id } = req.params
   const userId = req.userId
 
-  console.log("start")
   if(!id) return res.status(400).json({ message: ('Invalid Node id!')})
   const content = await prisma.node.findMany(
   {
@@ -167,8 +165,7 @@ export const getContent = async(req, res)=>{
     ...node,
     size: node.size ? Number(node.size) : 0
   }))
-
-  console.log("end")
+  
   return res.status(200).json({content: safeContent, message: (`Successfully fetched all the child node of root id: ${id}`)})
 }
 
@@ -191,7 +188,7 @@ export const getImages = async(req, res)=>{
       return res.status(200).json({ images: images, message: (`Found all Images with userId: ${userId}`)})
     }
     catch(e){
-      return res.status(400).json({ message: e.message || ('Something went wrong!')})
+      return res.status(400).json({ message: ('Something went wrong!')})
     }
 }
 
@@ -214,7 +211,7 @@ export const getDocs = async(req, res)=>{
       return res.status(200).json({ docs: docs, message: (`Found all Documents with userId: ${userId}`)})
     }
     catch(e){
-      return res.status(400).json({ message: e.message || ('Something went wrong!')})
+      return res.status(400).json({ message: ('Something went wrong!')})
     }
 }
 
@@ -237,6 +234,6 @@ export const getMisc = async(req, res)=>{
       return res.status(200).json({ mics: mics, message: (`Found all Misc files with userId: ${userId}`)})
     }
     catch(e){
-      return res.status(400).json({ message: e.message || ('Something went wrong!')})
+      return res.status(400).json({ message: ('Something went wrong!')})
     }
 }
