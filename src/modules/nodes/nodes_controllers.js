@@ -144,6 +144,7 @@ export const getContent = async(req, res)=>{
   const { id } = req.params
   const userId = req.userId
 
+  console.log("start")
   if(!id) return res.status(400).json({ message: ('Invalid Node id!')})
   const content = await prisma.node.findMany(
   {
