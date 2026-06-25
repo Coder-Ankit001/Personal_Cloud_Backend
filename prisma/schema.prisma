@@ -68,6 +68,9 @@ model Node {
   type  NodeType
   color Color @default(BLUE)
   ext Extension?
+  storagePath String?
+  size        BigInt?
+  contentType    String?
 
   // User <--(rootOf)-- Node
   rootOf User? @relation("UserRoot")
