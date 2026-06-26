@@ -5,7 +5,7 @@ import { ListObjectsV2Command } from "@aws-sdk/client-s3";
 
 import { s3 } from "../../config/s3.js";
 
-
+// Upload Stream
 export async function uploadStream({
   stream,
   storagePath,
@@ -23,7 +23,9 @@ export async function uploadStream({
   return upload.done();
 }
 
-export async function getObject(storagePath) {
+
+// Download Stream
+export async function getObject({storagePath}) {
     return s3.send(
         new GetObjectCommand({
             Bucket: process.env.SUPABASE_S3_BUCKET,
@@ -32,6 +34,8 @@ export async function getObject(storagePath) {
     )
 }
 
+
+// Delete Object
 export async function deleteObject(storagePath) {
     return s3.send(
         new DeleteObjectCommand({
@@ -40,7 +44,9 @@ export async function deleteObject(storagePath) {
         })
     )
 }
-      
+
+
+// List Objects
 export async function listObjects(){
     await s3.send(
         new ListObjectsV2Command({

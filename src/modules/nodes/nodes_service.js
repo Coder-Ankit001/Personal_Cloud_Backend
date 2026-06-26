@@ -25,3 +25,8 @@ export async function createFile({
     })
     return node
 }
+
+export async function getFile({userId, id}) {
+    const node = await prisma.node.findFirst({ where: {id, userId}})
+    return node
+}

@@ -2,6 +2,8 @@ import busboy from "busboy"
 
 import { createFile } from "../nodes/nodes_service.js"
 import { uploadStream } from "./storage_service.js"
+import { getObject } from "./storage_service.js"
+import { getFile } from "../nodes/nodes_service.js"
 
 export async function streamUpload(req, res){
     const bb = busboy({ headers: req.headers })
@@ -73,4 +75,27 @@ export async function streamUpload(req, res){
             fail(500, e);
         }
     })
+}
+
+export async function streamDownload(req, res) {
+    try{
+        const userId = req.userId
+        const { id } = req.params
+        const file = await getFile({id, userId})
+    
+        if(!file || !file.storagePath) return res.status(400).json({ message: ('Not a downloadable content!')})
+        console.log("storage Path", file) 
+        const { Body } = await getObject({storagePath: file.storagePath})
+
+        // Setting headers so browser know its downloadable file
+        res.setHeader('x-filename', file.name)
+        res.setHeader('Content-Disposition', `attachment; filename="${file.name || 'file'}"`)
+        res.setHeader('Content-Type', file.contentType || 'application/octet-stream')
+
+        Body.pipe(res)
+    }
+    catch(e){
+        console.error("Error: ", e)
+        return res.status(500).json({ message: ('Error while downloading stream')})
+    }
 }
