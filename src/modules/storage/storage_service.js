@@ -36,7 +36,7 @@ export async function getObject({storagePath}) {
 
 
 // Delete Object
-export async function deleteObject(storagePath) {
+export async function deleteObject({storagePath}) {
     return s3.send(
         new DeleteObjectCommand({
             Bucket: process.env.SUPABASE_S3_BUCKET,

@@ -30,3 +30,8 @@ export async function getFile({userId, id}) {
     const node = await prisma.node.findFirst({ where: {id, userId}})
     return node
 }
+
+export async function deleteFile({userId, id}) {
+    const node = await prisma.node.delete({ where: {id, userId}})
+    return node
+}
