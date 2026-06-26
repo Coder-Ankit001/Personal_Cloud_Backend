@@ -107,6 +107,24 @@ export const deleteFile = async(req, res)=>{
 }
 
 
+// Controller: Move File
+export const moveFile = async(req, res)=>{
+  try{
+    const {id, userId, destId} = req.body
+
+    if(!id || !userId) return res.status(400).json({ message: ('Incomplete Details!')})
+
+    const file = await prisma.node.findFirst({ where: {id, userId}})
+    if(!file || !file.parentId) return res.status(400).json({ message: ('Could not find the file!')})
+    const updatedFile = await prisma.node.update({ where: {id, userId}, data: {parentId: destId}})
+    return res.status(200).json({ message: ('File has been sucessfully moved!')})
+  }
+  catch(e){
+    console.error(e)
+    return res.status(500).json({ message: ('Error while moving file!')})
+  }
+}
+
 
 // Controller: Get Path
 export const getPath = async(req, res)=>{
@@ -144,7 +162,6 @@ export const getContent = async(req, res)=>{
   const { id } = req.params
   const userId = req.userId
 
-  console.log("start")
   if(!id) return res.status(400).json({ message: ('Invalid Node id!')})
   const content = await prisma.node.findMany(
   {
