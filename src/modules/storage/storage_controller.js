@@ -1,10 +1,10 @@
 import busboy from "busboy"
 
-import { createFile } from "../nodes/nodes_service.js"
-import { uploadStream } from "./storage_service.js"
-import { getObject } from "./storage_service.js"
-import { getFile } from "../nodes/nodes_service.js"
+import { uploadStream, getObject, deleteObject } from "./storage_service.js"
+import { createFile, getFile, deleteFile } from "../nodes/nodes_service.js"
 
+
+// Upload a File
 export async function streamUpload(req, res){
     const bb = busboy({ headers: req.headers })
     let meta = {}
@@ -77,6 +77,8 @@ export async function streamUpload(req, res){
     })
 }
 
+
+// Download a File
 export async function streamDownload(req, res) {
     try{
         const userId = req.userId
@@ -97,5 +99,25 @@ export async function streamDownload(req, res) {
     catch(e){
         console.error("Error: ", e)
         return res.status(500).json({ message: ('Error while downloading stream')})
+    }
+}
+
+
+// Delete a File
+export async function deleteStorage(req, res) {
+    try{
+        const userId = req.userId
+        const { id } = req.params
+    
+        const file = await deleteFile({id, userId})
+        if(!file || !file.storagePath) return res.status(400).json({ message: ('File does not exist!')})
+        console.log("Storage Path: ", file.storagePath)
+        const delResponse = await deleteObject({storagePath: file.storagePath})
+        console.log(delResponse)
+        return res.status(200).json({ message: (`Successfully deleted File with id: ${id}`)})
+    }
+    catch(e){
+        console.error("Error: ", e)
+        return res.status(500).json({ message: ('Unable to delete the file!')})
     }
 }
