@@ -2,7 +2,7 @@ import express from 'express'
 
 import { authenticate } from '../../middlewares/auth.js';
 import { renameNode, createFolder, deleteFolder } from './nodes_controllers.js';
-import { createFile, deleteFile  } from './nodes_controllers.js';
+import { createFile, deleteFile, moveFile  } from './nodes_controllers.js';
 import { getPath, getContent, getImages, getDocs, getMisc  } from './nodes_controllers.js';
 
 const router = express.Router();
@@ -12,8 +12,12 @@ router.get('/', (req, res) => {
 });
 
 
-// Rename A Node
+// Rename a Node
 router.post('/rename', renameNode)
+
+
+// Move a Node
+router.post('/move', moveFile)
 
 
 // Create a folder
