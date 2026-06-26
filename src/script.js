@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import env from "./config/env.js";
 import { prisma } from "./db.js";
 import bcrypt from 'bcrypt'
 

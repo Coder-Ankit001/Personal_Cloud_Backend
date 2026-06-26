@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import env from './config/env.js';
 import express from 'express';
 import cors from 'cors'
 import cookieParser from 'cookie-parser';
@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: env.FRONTEND_URL,
   credentials: true,
   exposedHeaders: ['x-filename', 'Content-Disposition', 'Content-Type']
 }))

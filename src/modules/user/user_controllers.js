@@ -1,3 +1,4 @@
+import env from '../../config/env.js'
 import { prisma } from '../../db.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
@@ -12,10 +13,10 @@ export const tokenRefresh = (req, res) => {
   
   const refreshToken = cookies.jwt
   let userData = null
-  jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN, (err, user)=>{
+  jwt.verify(refreshToken, env.JWT_REFRESH_TOKEN, (err, user)=>{
     if(err) return res.status(403).json({ message: ('Forbidden') })
     userData = { id: user.id, rootId: user.rootId, username: user.username, email: user.email }
-    const accessToken = jwt.sign(userData, process.env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
+    const accessToken = jwt.sign(userData, env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
 
     return res.status(200).json({ message: ('Token is refreshed!'), accessToken, user: userData})
   })
@@ -36,9 +37,9 @@ export const registerUser = async (req, res)=>{
     await prisma.user.update({ where: {id: user.id}, data: {rootId: root.id}})
 
     const userData = { id: user.id, rootId: user.rootId, username: user.username, email: user.email }
-    const accessToken = jwt.sign(userData, process.env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
+    const accessToken = jwt.sign(userData, env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
   
-    const refreshToken = jwt.sign(userData, process.env.JWT_REFRESH_TOKEN, { expiresIn: '1d'})
+    const refreshToken = jwt.sign(userData, env.JWT_REFRESH_TOKEN, { expiresIn: '1d'})
 
     res.cookie('jwt', refreshToken, {
       httpOnly: true,
@@ -68,9 +69,9 @@ export const loginUser = async (req, res)=>{
     if(!match) return res.status(401).json({ message: ('Invalid Credentials!') })
   
     const userData = { id: user.id, rootId: user.rootId, username: user.username, email: user.email }
-    const accessToken = jwt.sign(userData, process.env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
+    const accessToken = jwt.sign(userData, env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
   
-    const refreshToken = jwt.sign(userData, process.env.JWT_REFRESH_TOKEN, { expiresIn: '1d'})
+    const refreshToken = jwt.sign(userData, env.JWT_REFRESH_TOKEN, { expiresIn: '1d'})
 
     res.cookie('jwt', refreshToken, {
       httpOnly: true,
