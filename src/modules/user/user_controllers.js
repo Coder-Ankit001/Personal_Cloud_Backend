@@ -83,6 +83,7 @@ export const loginUser = async (req, res)=>{
     return res.status(200).json({ message: ('User sucessfully logged in'), accessToken, user: userData})
   }
   catch(e){
+    console.log(e)
     return res.status(500).json({ message: ('Internal Server Error')})
   }
 
