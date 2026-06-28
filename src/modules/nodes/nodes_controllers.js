@@ -70,43 +70,6 @@ export const deleteFolder = async(req, res)=>{
     }
 }
 
-
-
-// Controller: Create File 
-export const createFile = async(req, res)=>{
-  const {userId, name, parentId} = req.body
-  const ext = req.body.ext?.toUpperCase()
-  const type = req.body.type?.toUpperCase()
-
-  if(!userId || !name || type !== 'FILE' || !parentId) return res.status(400).json({ message: ('Incomplete Details!') })
-
-  try{
-    const node = await prisma.node.create({
-      data: { userId, name, type, ext, parentId}
-    })
-    return res.status(201).json({ message: ('File has been created successfully!')})
-  }
-  catch(e){
-    return res.status(400).json({ message: ('Data is invalid')})
-  }
-}
-
-// Controller: Delete File 
-export const deleteFile = async(req, res)=>{
-  const { id, userId, type } = req.body
-
-  if(!id || !userId || !type) return res.status(400).json({ message: ('Incomplete Details!')})
-
-  try{
-    const node = await prisma.node.delete({ where: {id: id, userId: userId, type: type}})
-    return res.status(204).json({ message: (`File with id: ${id} has been successfully deleted`)})
-  }
-  catch(e){
-    res.status(400).json({ message: ('Something went wrong')})
-  }
-}
-
-
 // Controller: Move File
 export const moveFile = async(req, res)=>{
   try{
