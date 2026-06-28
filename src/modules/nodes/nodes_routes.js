@@ -17,7 +17,7 @@ router.post('/rename', renameNode)
 
 
 // Move a File
-router.post('/move', moveFile)
+router.post('/file/move', moveFile)
 
 
 // Create a folder
