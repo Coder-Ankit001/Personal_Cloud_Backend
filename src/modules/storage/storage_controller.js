@@ -72,7 +72,7 @@ export async function streamUpload(req, res){
             res.status(201).json({ message: ('File Uploaded Successfully!'), node});
         }
         catch (e) {
-            fail(500, e);
+            fail(500, ('Error while uploading File!'))
         }
     })
 }

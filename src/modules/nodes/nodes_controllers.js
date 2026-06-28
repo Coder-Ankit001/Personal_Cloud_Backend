@@ -21,7 +21,7 @@ export const createFolder = async (req, res)=>{
   const {userId, name, parentId} = req.body
   const color = req.body.color?.toUpperCase()
   const type = req.body.type?.toUpperCase()
-  if(!userId || !name || type !== 'FOLDER' || !color) return res.status(400).json({ message: ('Incomplete Details!') })
+  if(!userId || !name || type !== 'FOLDER' || !color || !parentId) return res.status(400).json({ message: ('Incomplete Details!') })
 
   try{
   const node = await prisma.node.create({
@@ -78,7 +78,7 @@ export const createFile = async(req, res)=>{
   const ext = req.body.ext?.toUpperCase()
   const type = req.body.type?.toUpperCase()
 
-  if(!userId || !name || type !== 'FILE') return res.status(400).json({ message: ('Incomplete Details!') })
+  if(!userId || !name || type !== 'FILE' || !parentId) return res.status(400).json({ message: ('Incomplete Details!') })
 
   try{
     const node = await prisma.node.create({
