@@ -75,10 +75,10 @@ export const moveFile = async(req, res)=>{
   try{
     const {id, userId, destId} = req.body
 
-    if(!id || !userId) return res.status(400).json({ message: ('Incomplete Details!')})
+    if(!id || !userId || !destId) return res.status(400).json({ message: ('Incomplete Details!')})
 
     const file = await prisma.node.findFirst({ where: {id, userId}})
-    if(!file || !file.parentId) return res.status(400).json({ message: ('Could not find the file!')})
+    if(!file) return res.status(400).json({ message: ('Could not find the file!')})
     const updatedFile = await prisma.node.update({ where: {id, userId}, data: {parentId: destId}})
     return res.status(200).json({ message: ('File has been sucessfully moved!')})
   }
