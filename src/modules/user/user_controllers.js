@@ -34,9 +34,9 @@ export const registerUser = async (req, res)=>{
     const hashPassword = await bcrypt.hash(password, saltRounds)
     const user = await prisma.user.create({ data: {email, username, password: hashPassword}})
     const root = await createRoot({userId: user.id})
-    await prisma.user.update({ where: {id: user.id}, data: {rootId: root.id}})
+    const updatedUser = await prisma.user.update({ where: {id: user.id}, data: {rootId: root.id}})
 
-    const userData = { id: user.id, rootId: user.rootId, username: user.username, email: user.email }
+    const userData = { id: updatedUser.id, rootId: updatedUser.rootId, username: updatedUser.username, email: updatedUser.email }
     const accessToken = jwt.sign(userData, env.JWT_ACCESS_TOKEN, { expiresIn: '10m'})
   
     const refreshToken = jwt.sign(userData, env.JWT_REFRESH_TOKEN, { expiresIn: '1d'})
