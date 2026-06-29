@@ -1,7 +1,8 @@
 import express from 'express'
 
 import { authenticate } from '../../middlewares/auth.js';
-import { renameNode, createFolder, deleteFolder, moveFolder } from './nodes_controllers.js';
+import { renameNode, moveToTrash, restoreTrash  } from './nodes_controllers.js';
+import { createFolder, deleteFolder, moveFolder } from './nodes_controllers.js';
 import { moveFile  } from './nodes_controllers.js';
 import { getPath, getContent, getImages, getDocs, getMisc  } from './nodes_controllers.js';
 
@@ -14,6 +15,14 @@ router.get('/', (req, res) => {
 
 // Rename a Node
 router.post('/rename', renameNode)
+
+
+// Move Nodes to Trash
+router.patch('/trash/move', moveToTrash)
+
+
+// Restore Nodes from Trash
+router.patch('/trash/restore', restoreTrash)
 
 
 // Move a File
