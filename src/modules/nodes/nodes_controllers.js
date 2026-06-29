@@ -70,6 +70,38 @@ export const deleteFolder = async(req, res)=>{
     }
 }
 
+// Controller: Move Folder
+export const moveFolder = async(req, res)=>{
+  try{
+    const {srcId, userId, destId} = req.body
+
+    if(!srcId || !userId || !destId) return res.status(400).json({ message: ('Incomplete Details!')})
+
+    const node = await prisma.$queryRaw`
+      WITH RECURSIVE descendants AS (
+        SELECT n.id FROM "Node" n
+        WHERE n.id = ${srcId}
+
+        UNION All
+        
+        SELECT n.id FROM "Node" n
+        JOIN descendants d
+        ON n."parentId" = d.id
+      )
+
+      SELECT d.id FROM descendants d
+      WHERE d.id = ${destId}
+    `
+    if(node.length > 0) throw new Error('Cycle has been detected while moving folder!')
+    await prisma.node.update({ where: {id: srcId, userId: userId}, data: {parentId: destId}})
+    return res.status(200).json({ message: ('Folder have been moved successfully!')})
+  }
+  catch(e){
+    console.error(e.message || ('Something went wrong'))
+    return res.status(500).json({ message: ("Something went wrong!")})
+  }
+}
+
 // Controller: Move File
 export const moveFile = async(req, res)=>{
   try{
@@ -79,7 +111,7 @@ export const moveFile = async(req, res)=>{
 
     const file = await prisma.node.findFirst({ where: {id, userId}})
     if(!file) return res.status(400).json({ message: ('Could not find the file!')})
-    const updatedFile = await prisma.node.update({ where: {id, userId}, data: {parentId: destId}})
+    const updatedFile = await prisma.node.update({ where: { id: id }, data: {parentId: destId}})
     return res.status(200).json({ message: ('File has been sucessfully moved!')})
   }
   catch(e){

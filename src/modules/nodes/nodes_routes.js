@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { authenticate } from '../../middlewares/auth.js';
-import { renameNode, createFolder, deleteFolder } from './nodes_controllers.js';
+import { renameNode, createFolder, deleteFolder, moveFolder } from './nodes_controllers.js';
 import { moveFile  } from './nodes_controllers.js';
 import { getPath, getContent, getImages, getDocs, getMisc  } from './nodes_controllers.js';
 
@@ -26,6 +26,10 @@ router.post('/folder/create', createFolder)
 
 // Delete a folder
 router.delete('/folder/delete', deleteFolder)
+
+
+// Move a Folder
+router.post('/folder/move', moveFolder)
 
 
 // Get Path from Root
