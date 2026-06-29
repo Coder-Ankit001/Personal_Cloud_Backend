@@ -71,6 +71,7 @@ model Node {
   storagePath String?
   size        BigInt?
   contentType    String?
+  inTrash DateTime?
 
   // User <--(rootOf)-- Node
   rootOf User? @relation("UserRoot")

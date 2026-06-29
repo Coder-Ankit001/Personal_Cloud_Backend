@@ -16,6 +16,70 @@ export const renameNode = async(req, res)=>{
 }
 
 
+// Controller: Move Node to Trash Recursively
+export const moveToTrash = async(req, res)=>{
+  const { srcId, userId, } = req.body
+
+  if(!srcId || !userId) return res.status(400).json({ message: ('Incomplete Details!')})
+  try{
+    const nodes = await prisma.$executeRaw`
+     WITH RECURSIVE descendants AS (
+      SELECT n.id FROM "Node" n
+      WHERE n.id = ${srcId}
+
+      UNION All
+
+      SELECT n.id FROM "Node" n
+      JOIN descendants d
+      ON n."parentId" = d.id
+     )
+     UPDATE "Node"
+     SET "inTrash" = ${new Date()}
+     WHERE id IN(
+      SELECT id FROM descendants
+     )
+    `
+    return res.status(200).json({ message: ('Successfully Moved Files in Trash!')})
+  }
+  catch(e){
+    console.log(e.message || ('Something Went Wrong!'))
+    return res.status(500).json({ message: e.message || ('Something Went Wrong!')})
+  }
+}
+
+
+// Controller: Restore Node From Trash Recursively
+export const restoreTrash = async(req, res)=>{
+  const { srcId, userId, } = req.body
+
+  if(!srcId || !userId) return res.status(400).json({ message: ('Incomplete Details!')})
+  try{
+    const nodes = await prisma.$executeRaw`
+     WITH RECURSIVE descendants AS (
+      SELECT n.id FROM "Node" n
+      WHERE n.id = ${srcId}
+
+      UNION All
+
+      SELECT n.id FROM "Node" n
+      JOIN descendants d
+      ON n."parentId" = d.id
+     )
+     UPDATE "Node"
+     SET "inTrash" = NULL
+     WHERE id IN(
+      SELECT id FROM descendants
+     )
+    `
+    return res.status(200).json({ message: ('Successfully Restore From Trash!')})
+  }
+  catch(e){
+    console.log(e.message || ('Something Went Wrong!'))
+    return res.status(500).json({ message: e.message || ('Something Went Wrong!')})
+  }
+}
+
+
 // Controller: Create Directory 
 export const createFolder = async (req, res)=>{
   const {userId, name, parentId} = req.body
@@ -157,7 +221,8 @@ export const getContent = async(req, res)=>{
   {
     where: {
       parentId: id,
-      userId: userId
+      userId: userId,
+      inTrash: null
     },
     orderBy: [
       {
@@ -188,6 +253,7 @@ export const getImages = async(req, res)=>{
       const images = await prisma.node.findMany({ 
         where: {
           userId: userId, 
+          inTrash: null,
           ext: {
             in:   ["JPG", "JPEG", "PNG", "GIF"] 
           }
@@ -211,6 +277,7 @@ export const getDocs = async(req, res)=>{
       const docs = await prisma.node.findMany({ 
         where: {
           userId: userId, 
+          inTrash: null,
           ext: {
             in:   ["PDF", "DOCS", "XLSX"] 
           }
@@ -234,6 +301,7 @@ export const getMisc = async(req, res)=>{
       const mics = await prisma.node.findMany({ 
         where: {
           userId: userId, 
+          inTrash: null,
           ext: {
             in:   ["TXT", "CSV", "ZIP"] 
           }
