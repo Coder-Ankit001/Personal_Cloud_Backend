@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN DIRECT_URL="postgresql://postgres.dummy" npx prisma generate --schema=./prisma/schema.prisma
 
 EXPOSE 3000
 
