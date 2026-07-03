@@ -80,6 +80,30 @@ export const restoreTrash = async(req, res)=>{
 }
 
 
+// Controller: Get Trash Items
+export const getTrashItems = async(req, res)=>{
+  try{
+    const userId = req.userId
+
+    console.log(userId)
+    if(!userId) return res.status(400).json({ message: ('Access Denied!')})
+    const nodes = await prisma.$queryRaw`
+      SELECT n.* FROM "Node" p
+      LEFT JOIN "Node" n
+      ON n."parentId" = p.id
+      WHERE n."userId" = ${userId}
+      AND n."inTrash" IS NOT NULL
+      AND p."inTrash" IS NULL
+    `
+    res.status(200).json({ message: ('All Trash Files Found!'), nodes: nodes})
+  }
+  catch(e){
+    console.log(e.message || ('Something went wrong'))
+    return res.status(500).json({ message: ('Error while retrieving trash data!')})
+  }
+}
+
+
 // Controller: Create Directory 
 export const createFolder = async (req, res)=>{
   const {userId, name, parentId} = req.body
