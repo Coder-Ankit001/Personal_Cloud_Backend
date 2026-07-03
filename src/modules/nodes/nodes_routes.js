@@ -1,9 +1,8 @@
 import express from 'express'
 
 import { authenticate } from '../../middlewares/auth.js';
-import { renameNode, moveToTrash, restoreTrash, getTrashItems  } from './nodes_controllers.js';
-import { createFolder, deleteFolder, moveFolder } from './nodes_controllers.js';
-import { moveFile  } from './nodes_controllers.js';
+import { renameNode, moveNode, moveToTrash, restoreTrash, getTrashItems  } from './nodes_controllers.js';
+import { createFolder, deleteFolder } from './nodes_controllers.js';
 import { getPath, getContent, getImages, getDocs, getMisc  } from './nodes_controllers.js';
 
 const router = express.Router();
@@ -29,8 +28,8 @@ router.patch('/trash/move', moveToTrash)
 router.patch('/trash/restore', restoreTrash)
 
 
-// Move a File
-router.post('/file/move', moveFile)
+// Move a Node
+router.patch('/move', moveNode)
 
 
 // Create a folder
@@ -39,10 +38,6 @@ router.post('/folder/create', createFolder)
 
 // Delete a folder
 router.delete('/folder/delete', deleteFolder)
-
-
-// Move a Folder
-router.post('/folder/move', moveFolder)
 
 
 // Get Path from Root
