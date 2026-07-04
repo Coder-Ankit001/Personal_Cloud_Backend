@@ -1,4 +1,5 @@
 import { prisma } from '../../db.js'
+import { deleteFiles } from '../storage/storage_service.js'
 
 
 // Controller: Rename Node 
@@ -147,33 +148,55 @@ export const getTrashItems = async(req, res)=>{
 export const deleteNode = async(req, res)=>{
   const { id } = req.body
   const userId = req.userId
-  console.log(userId, id)
   if(!id || !userId) return res.status(400).json({ message: ('Incomplete Details!') })
 
   try{
-      const count = await prisma.$executeRaw`
-      WITH RECURSIVE descendants AS(
-        SELECT id, "userId" FROM "Node"
-        WHERE id = ${id} 
-        AND "userId" = ${userId}
+      // Get all files
+      const files = await prisma.$queryRaw`
+        WITH RECURSIVE descendants AS(
+          SELECT n.id FROM "Node" n
+          WHERE n.id = ${id}
+          AND n."userId" = ${userId}
 
-        UNION All
+          UNION All
 
-        SELECT n.id, n."userId" FROM "Node" n
-        JOIN descendants d
-        ON n."parentId" = d.id
-      )
+          SELECT n.id FROM "Node" n
+          JOIN descendants d 
+          ON n."parentId" = d.id
+        )
 
-      DELETE FROM "Node"
-      WHERE id IN (
-        SELECT id FROM descendants
-      )
+        SELECT n.* FROM "Node" n
+        JOIN descendants d 
+        ON n.id = d.id
+        WHERE n.type::text = 'FILE'
+        AND n."storagePath" IS NOT NULL
       `
-      if (count === 0) {
-        return res.status(404).json({
-          message: "Node not found"
-        });
-      }
+
+      // Nothing to delete
+      if( files.length === 0 ) return res.status(400).json({ message: ('Nothing to delete here!')})
+
+      // Delete Files
+      const deleteRes = await deleteFiles({ files })
+
+      // Delete meta data recursively
+      const count = await prisma.$executeRaw`
+        WITH RECURSIVE descendants AS(
+          SELECT id, "userId" FROM "Node"
+          WHERE id = ${id} 
+          AND "userId" = ${userId}
+
+          UNION All
+
+          SELECT n.id, n."userId" FROM "Node" n
+          JOIN descendants d
+          ON n."parentId" = d.id
+        )
+
+        DELETE FROM "Node"
+        WHERE id IN (
+          SELECT id FROM descendants
+        )
+        `
       return res.status(200).json({ message: (`Node with id: ${id} has been deleted!`)})
     }
     catch(e){
