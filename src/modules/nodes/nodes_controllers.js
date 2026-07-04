@@ -284,8 +284,8 @@ export const getContent = async(req, res)=>{
 
 // Controller: Get All Images With UserID 
 export const getImages = async(req, res)=>{
-  const {userId} = req.params
-
+  const userId = req.userId
+  console.log("User Id", userId)
   if(!userId) return res.status(400).json({ message: ('Nothing to see here!')})
 
     try{
@@ -294,13 +294,27 @@ export const getImages = async(req, res)=>{
           userId: userId, 
           inTrash: null,
           ext: {
-            in:   ["JPG", "JPEG", "PNG", "GIF"] 
+            in:   ['JPG', 'JPEG', 'PNG', 'GIF']
           }
-        }
+        },
+        orderBy: [
+          {
+            ext: 'asc'
+          },
+          {
+            name: 'asc'
+          }
+        ]
       })
-      return res.status(200).json({ images: images, message: (`Found all Images with userId: ${userId}`)})
+
+      const safeImages = images.map(image => ({
+        ...image,
+        size: image.size ? Number(image.size) : 0
+      }))
+      return res.status(200).json({ images: safeImages, message: (`Found all Images with userId: ${userId}`)})
     }
     catch(e){
+      console.log(e.message || ("error"))
       return res.status(400).json({ message: ('Something went wrong!')})
     }
 }
@@ -308,7 +322,7 @@ export const getImages = async(req, res)=>{
 
 // Controller: Get All Docs With UserID 
 export const getDocs = async(req, res)=>{
-  const {userId} = req.params
+  const userId = req.userId
 
   if(!userId) return res.status(400).json({ message: ('Nothing to see here!')})
 
@@ -318,11 +332,24 @@ export const getDocs = async(req, res)=>{
           userId: userId, 
           inTrash: null,
           ext: {
-            in:   ["PDF", "DOCS", "XLSX"] 
+            in:   ['PDF', 'DOCS', 'XLSX'] 
           }
         },
+        orderBy: [
+          {
+            ext: 'asc'
+          },
+          {
+            name: 'asc'
+          }
+        ]
       })
-      return res.status(200).json({ docs: docs, message: (`Found all Documents with userId: ${userId}`)})
+
+      const safeDocs = docs.map(docs => ({
+        ...docs,
+        size: docs.size ? Number(docs.size) : 0
+      }))
+      return res.status(200).json({ docs: safeDocs, message: (`Found all Documents with userId: ${userId}`)})
     }
     catch(e){
       return res.status(400).json({ message: ('Something went wrong!')})
@@ -332,12 +359,12 @@ export const getDocs = async(req, res)=>{
 
 // Controller: Get All Mics Files With UserID 
 export const getMisc = async(req, res)=>{
-  const {userId} = req.params
+  const userId = req.userId
 
   if(!userId) return res.status(400).json({ message: ('Nothing to see here!')})
 
     try{
-      const mics = await prisma.node.findMany({ 
+      const miscs = await prisma.node.findMany({ 
         where: {
           userId: userId, 
           inTrash: null,
@@ -345,8 +372,20 @@ export const getMisc = async(req, res)=>{
             in:   ["TXT", "CSV", "ZIP"] 
           }
         },
+        orderBy: [
+          {
+            ext: 'asc'
+          },
+          {
+            name: 'asc'
+          }
+        ]
       })
-      return res.status(200).json({ mics: mics, message: (`Found all Misc files with userId: ${userId}`)})
+      const safeMisc = miscs.map(misc => ({
+        ...misc,
+        size: misc.size ? Number(misc.size) : 0
+      }))
+      return res.status(200).json({ miscs: safeMisc, message: (`Found all Misc files with userId: ${userId}`)})
     }
     catch(e){
       return res.status(400).json({ message: ('Something went wrong!')})

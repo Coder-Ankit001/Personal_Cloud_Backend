@@ -47,16 +47,17 @@ router.get('/:id', authenticate, getPath)
 // Get content of a folder
 router.get('/:id/contents', authenticate, getContent)
 
+
 // Get Images
-router.get('/:userId/file/images', getImages)
+router.get('/file/images', authenticate, getImages)
 
 
 // Get Documents
-router.get('/:userId/file/docs', getDocs)
+router.get('/file/docs', authenticate, getDocs)
 
 
 // Get Mics
-router.get('/:userId/file/mics', getMisc)
+router.get('/file/misc', authenticate, getMisc)
 
 
 export default router;
