@@ -1,8 +1,8 @@
 import express from 'express'
 
 import { authenticate } from '../../middlewares/auth.js';
-import { renameNode, moveNode, moveToTrash, restoreTrash, getTrashItems  } from './nodes_controllers.js';
-import { createFolder, deleteFolder } from './nodes_controllers.js';
+import { renameNode, moveNode, moveToTrash, restoreTrash, getTrashItems, deleteNode  } from './nodes_controllers.js';
+import { createFolder } from './nodes_controllers.js';
 import { getPath, getContent, getImages, getDocs, getMisc  } from './nodes_controllers.js';
 
 const router = express.Router();
@@ -32,12 +32,12 @@ router.patch('/trash/restore', restoreTrash)
 router.patch('/move', moveNode)
 
 
+// Delete a Node
+router.delete('/delete', authenticate, deleteNode)
+
+
 // Create a folder
 router.post('/folder/create', createFolder)
-
-
-// Delete a folder
-router.delete('/folder/delete', deleteFolder)
 
 
 // Get Path from Root
