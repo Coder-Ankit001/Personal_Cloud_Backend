@@ -282,7 +282,7 @@ docker run -d -p 3000:3000 --env-file .env --name personal-cloud-backend --resta
 - [x] 🟣 Supabase S3 streaming upload/download
 - [x] 🟣 Dockerized with Alpine
 - [x] 🟣 Deployed on Render
-- [ ] ⬜ Trash bin & soft delete
+- [x] ⬜ Trash bin & soft delete
 - [ ] ⬜ File sharing via signed URLs
 - [ ] ⬜ Full-text search
 - [ ] ⬜ File versioning
