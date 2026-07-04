@@ -55,3 +55,10 @@ export async function listObjects(){
         })
     )
 }
+
+// Delete Files
+export async function deleteFiles({ files }){
+    for (const { storagePath } of files) {
+        const delFile = await deleteObject({ storagePath })
+    }
+}
