@@ -120,7 +120,7 @@ export const getTrashItems = async(req, res)=>{
 
     console.log(userId)
     if(!userId) return res.status(400).json({ message: ('Access Denied!')})
-    const nodes = await prisma.$queryRaw`
+    const content = await prisma.$queryRaw`
       SELECT n.* FROM "Node" p
       LEFT JOIN "Node" n
       ON n."parentId" = p.id
@@ -128,7 +128,13 @@ export const getTrashItems = async(req, res)=>{
       AND n."inTrash" IS NOT NULL
       AND p."inTrash" IS NULL
     `
-    res.status(200).json({ message: ('All Trash Files Found!'), nodes: nodes})
+
+    const safeContent = content.map(node => ({
+      ...node,
+      size: node.size ? Number(node.size) : 0
+    }))
+
+    res.status(200).json({ message: ('All Trash Files Found!'), content: safeContent })
   }
   catch(e){
     console.log(e.message || ('Something went wrong'))
