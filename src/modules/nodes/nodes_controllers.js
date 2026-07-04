@@ -143,6 +143,45 @@ export const getTrashItems = async(req, res)=>{
 }
 
 
+// Controller: Recursively Delete Node 
+export const deleteNode = async(req, res)=>{
+  const { id } = req.body
+  const userId = req.userId
+  console.log(userId, id)
+  if(!id || !userId) return res.status(400).json({ message: ('Incomplete Details!') })
+
+  try{
+      const count = await prisma.$executeRaw`
+      WITH RECURSIVE descendants AS(
+        SELECT id, "userId" FROM "Node"
+        WHERE id = ${id} 
+        AND "userId" = ${userId}
+
+        UNION All
+
+        SELECT n.id, n."userId" FROM "Node" n
+        JOIN descendants d
+        ON n."parentId" = d.id
+      )
+
+      DELETE FROM "Node"
+      WHERE id IN (
+        SELECT id FROM descendants
+      )
+      `
+      if (count === 0) {
+        return res.status(404).json({
+          message: "Node not found"
+        });
+      }
+      return res.status(200).json({ message: (`Node with id: ${id} has been deleted!`)})
+    }
+    catch(e){
+      res.status(500).json({ message: ('Something went wrong!')})
+    }
+}
+
+
 // Controller: Create Directory 
 export const createFolder = async (req, res)=>{
   const {userId, name, parentId} = req.body
@@ -159,42 +198,6 @@ export const createFolder = async (req, res)=>{
   catch(e){
     return res.status(400).json({ message: ('Data is invalid')})
   }
-}
-
-// Controller: Recursively Delete Directory 
-export const deleteFolder = async(req, res)=>{
-  const {id, userId} = req.body
-  const type = req.body.type?.toUpperCase()
-  if(!id || !userId || !type) return res.status(400).json({ message: ('Incomplete Details!') })
-
-  try{
-      const count = await prisma.$executeRaw`
-      WITH RECURSIVE descendants AS(
-        SELECT id FROM "Node"
-        WHERE id = ${id}
-
-        UNION All
-
-        SELECT n.id FROM "Node" n
-        JOIN descendants d
-        ON n."parentId" = d.id
-      )
-
-      DELETE FROM "Node"
-      WHERE id IN (
-        SELECT id FROM descendants
-      )
-      `
-      if (count === 0) {
-        return res.status(404).json({
-          message: "Folder not found"
-        });
-      }
-      return res.status(200).json({ message: (`Folder with id: ${id} has been deleted!`)})
-    }
-    catch(e){
-      res.status(500).json({ message: ('Something went wrong!')})
-    }
 }
 
 
