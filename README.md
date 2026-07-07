@@ -145,7 +145,6 @@
 | Feature | Status |
 |---|---|
 | 🔍 Full-text search | Planned |
-| 🗑️ Trash bin & soft delete | Planned |
 | 🔗 File sharing & signed URLs | Planned |
 | 🕓 File versioning | Planned |
 | ⚙️ CI/CD via GitHub Actions | Planned |
